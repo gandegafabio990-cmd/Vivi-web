@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>找到幸运的你！/ We Want You 👉！</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a0533 0%, #2d0a5e 50%, #1a0533 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      padding: 30px 40px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      text-shadow: 0 0 20px rgba(180, 120, 255, 0.8);
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #c9a0ff;
+      margin-bottom: 28px;
+      letter-spacing: 2px;
+    }
+
+    .display-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(180, 120, 255, 0.4);
+      border-radius: 20px;
+      padding: 36px 30px;
+      margin-bottom: 28px;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(130, 60, 255, 0.2);
+      transition: box-shadow 0.3s;
+    }
+
+    .display-box.active {
+      box-shadow: 0 0 60px rgba(255, 200, 50, 0.4), 0 0 20px rgba(130, 60, 255, 0.4);
+      border-color: rgba(255, 200, 50, 0.6);
+    }
+
+    #selected-name {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 3px;
+      text-shadow: 0 0 30px rgba(255, 200, 50, 0.8);
+      transition: all 0.1s;
+    }
+
+    #selected-name.placeholder {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.3);
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-shadow: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 13px 40px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 1px;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5);
+    }
+
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(124, 58, 237, 0.7);
+    }
+
+    .btn-start:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      color: #c9a0ff;
+      border: 1.5px solid rgba(180, 120, 255, 0.4);
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Confetti */
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .counter {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1px;
+    }
+
+    .counter span {
+      color: #f0c040;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎉 找到幸运的你！</h1>
+  <div class="subtitle">✨ Mid-year Medical Review · Culture Talk · We Want You 👉</div>
+
+  <div class="display-box" id="display-box">
+    <div id="selected-name" class="placeholder">等待抽取 / Waiting...</div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-start" id="btn-start" onclick="startSelection()">🎲 开始抽取</button>
+    <button class="btn btn-reset" onclick="resetSelection()">🔄 重置</button>
+  </div>
+
+  <div class="counter">已抽取 <span id="count">0</span> 人 / 共 45 人</div>
+</div>
+
+<script>
+  const allNames = [
+    "Norah LAI", "白圆圆", "崔雪亮", "陈斌", "范嘉琦",
+    "郭旭东", "黄军华", "李含章", "李永文", "李越",
+    "梁湘樱", "刘思露", "刘腾飞", "刘颖中", "刘月",
+    "吕元", "马迪", "马冬梅", "毛宇嵘", "潘玮炜",
+    "饶秀芹", "沈慧", "孙斌", "田红梅", "佟彤",
+    "王静", "王钧堳", "韦薇", "温悦萌", "吴婷婷",
+    "谢姝颖", "闫萌", "姚红波", "Kevin YIN", "臧今楠",
+    "章冬银", "姚瑶", "Cherrie TAM", "高娟", "曹帅",
+    "王文慧", "宋析伶", "黄炎", "李子健", "张倩"
+  ];
+
+  let remaining = [...allNames];
+  let isRunning = false;
+  let animInterval = null;
+  let selectedCount = 0;
+
+  function startSelection() {
+    if (isRunning) return;
+    if (remaining.length === 0) {
+      document.getElementById('selected-name').textContent = '🎊 所有人已抽完！';
+      document.getElementById('selected-name').classList.remove('placeholder');
+      return;
+    }
+
+    isRunning = true;
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('display-box').classList.remove('active');
+
+    const nameEl = document.getElementById('selected-name');
+    nameEl.classList.remove('placeholder');
+
+    let speed = 60;
+    let elapsed = 0;
+    const duration = 2800;
+
+    animInterval = setInterval(() => {
+      const randomIdx = Math.floor(Math.random() * remaining.length);
+      nameEl.textContent = remaining[randomIdx];
+      elapsed += speed;
+
+      if (elapsed > duration * 0.6) speed = 120;
+      if (elapsed > duration * 0.8) speed = 200;
+
+      if (elapsed >= duration) {
+        clearInterval(animInterval);
+        pickFinal();
+      }
+    }, speed);
+  }
+
+  function pickFinal() {
+    const idx = Math.floor(Math.random() * remaining.length);
+    const winner = remaining[idx];
+    remaining.splice(idx, 1);
+    selectedCount++;
+
+    const nameEl = document.getElementById('selected-name');
+    nameEl.textContent = winner;
+    document.getElementById('display-box').classList.add('active');
+    document.getElementById('count').textContent = selectedCount;
+
+    launchConfetti();
+
+    isRunning = false;
+    document.getElementById('btn-start').disabled = false;
+  }
+
+  function resetSelection() {
+    if (isRunning) {
+      clearInterval(animInterval);
+      isRunning = false;
+    }
+    remaining = [...allNames];
+    selectedCount = 0;
+    document.getElementById('count').textContent = 0;
+    document.getElementById('btn-start').disabled = false;
+
+    const nameEl = document.getElementById('selected-name');
+    nameEl.textContent = '等待抽取 / Waiting...';
+    nameEl.classList.add('placeholder');
+    document.getElementById('display-box').classList.remove('active');
+  }
+
+  function launchConfetti() {
+    const colors = ['#a855f7', '#f0c040', '#ff6b9d', '#00d4ff', '#7fff7f', '#ff9a3c'];
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('div');
+      piece.classList.add('confetti-piece');
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (Math.random() * 8 + 6) + 'px';
+      piece.style.height = (Math.random() * 8 + 6) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }
+  }
+</script>
+</body>
+</html>
